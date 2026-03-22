@@ -1,0 +1,87 @@
+{
+  "name": "Dev Platform — UI",
+  "nodes": [
+    {
+      "id": "wh4",
+      "name": "UI Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "dev-ui",
+        "responseMode": "lastNode",
+        "httpMethod": "GET"
+      }
+    },
+    {
+      "id": "serve4",
+      "name": "Serve HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "const html=Buffer.from(\"PGgxPlVJIExvYWRpbmcgRXJyb3I8L2gxPg==\",\"base64\").toString(\"utf-8\");return [{json:{html}}];"
+      }
+    },
+    {
+      "id": "resp4",
+      "name": "Return HTML",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "UI Webhook": {
+      "main": [
+        [
+          {
+            "node": "Serve HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serve HTML": {
+      "main": [
+        [
+          {
+            "node": "Return HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": true
+}
