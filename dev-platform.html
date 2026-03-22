@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopSync Dev Platform</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0a;color:#e5e5e5;min-height:100vh;padding:32px 24px}
+.app{max-width:860px;margin:0 auto}
+h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.badge{background:#5865f2;color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.sub{color:#555;font-size:13px;margin-bottom:28px}
+.card{background:#111;border:1px solid #1e1e1e;border-radius:12px;padding:22px;margin-bottom:18px}
+.label{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+textarea{width:100%;background:#0a0a0a;border:1px solid #1e1e1e;color:#e5e5e5;border-radius:8px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;outline:none;line-height:1.6}
+textarea:focus{border-color:#5865f2}
+.btn{border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-p{background:#5865f2;color:#fff;width:100%;margin-top:12px}
+.btn-g{background:#27ae60;color:#fff}
+.btn-r{background:#e74c3c;color:#fff}
+.btn-ghost{background:#1a1a1a;color:#aaa;border:1px solid #222;font-size:12px;padding:8px 16px}
+#st{font-size:13px;margin-top:10px;padding:10px 14px;border-radius:6px;display:none}
+.info{background:#0d1a2a;border:1px solid #1a3a5a;color:#5fb8ff}
+.ok{background:#0d1a0d;border:1px solid #1a4a1a;color:#5fd45f}
+.err{background:#1a0d0d;border:1px solid #4a1a1a;color:#f55}
+.ti{background:#0a0a0a;border:2px solid #1a1a1a;border-radius:8px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .1s}
+.ti.sel{border-color:#5865f2;background:#0d0f1f}
+.ti:hover{border-color:#333}
+.tt{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chk{width:16px;height:16px;border:2px solid #333;border-radius:3px;flex-shrink:0}
+.sel .chk{background:#5865f2;border-color:#5865f2}
+.ttl{font-size:14px;font-weight:600;flex:1}
+.pill{font-size:10px;padding:2px 7px;border-radius:4px}
+.ph{background:#2a1515;color:#e74c3c}
+.pm{background:#2a2015;color:#e67e22}
+.pl{background:#152015;color:#27ae60}
+.tdesc{font-size:12px;color:#666;line-height:1.5;margin-bottom:4px}
+.tfile{font-family:monospace;font-size:11px;color:#444}
+.row{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.cnt{font-size:12px;color:#555;margin-right:auto}
+.sep{border-top:1px solid #1a1a1a;margin:16px 0}
+.sr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #111}
+.sr:last-child{border:none}
+.sico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;font-weight:700}
+.sw{background:#1a1a1a;color:#555}
+.srn{background:#2a2a10;color:#f39c12}
+.so{background:#102a10;color:#27ae60}
+.se{background:#2a1010;color:#e74c3c}
+.slbl{font-size:13px;color:#777}
+.slbl strong{color:#ccc}
+.sumbox{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:12px;font-size:13px;color:#888;line-height:1.6;margin-bottom:14px}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>ShopSync Dev Platform <span class="badge">AI</span></h1>
+  <p class="sub">Fikir ver &rarr; Analiz &rarr; Kod Uret &rarr; PR</p>
+
+  <div class="card" id="ci">
+    <div class="label">Uygulama Fikri &amp; Gereksinimler</div>
+    <textarea id="idea" rows="9" placeholder="Uygulamanin ne yapmasi gerektigini detaylica anlat. Ozellikler, kullanici hikayeleri, teknik gereksinimler..."></textarea>
+    <div id="st"></div>
+    <button class="btn btn-p" id="ab">Analiz Et &amp; Task Listesi Olustur</button>
+  </div>
+
+  <div class="card" id="ct" style="display:none">
+    <div class="label">Analiz &amp; Task Listesi</div>
+    <div class="sumbox" id="sumbox"></div>
+    <div id="tl"></div>
+    <div class="sep"></div>
+    <div class="row">
+      <span class="cnt" id="cnt">0/0 secili</span>
+      <button class="btn btn-ghost" id="sa">Tumunu Sec</button>
+      <button class="btn btn-g" id="sb">Pipeline Baslat</button>
+    </div>
+  </div>
+
+  <div class="card" id="cp" style="display:none">
+    <div class="label">Pipeline Durumu</div>
+    <div>
+      <div class="sr"><div class="sico sw" id="s1">1</div><div class="slbl"><strong>Kod Yaziliyor</strong> &mdash; qwen ile dosyalar olusturuluyor</div></div>
+      <div class="sr"><div class="sico sw" id="s2">2</div><div class="slbl"><strong>TypeScript Kontrol</strong> &mdash; tsc --noEmit</div></div>
+      <div class="sr"><div class="sico sw" id="s3">3</div><div class="slbl"><strong>Tamamlandi</strong></div></div>
+      <div class="sr"><div class="sico sw" id="s4">4</div><div class="slbl"><strong>PR Onayi Bekleniyor</strong></div></div>
+    </div>
+    <div id="prs" style="display:none;margin-top:16px">
+      <div class="sumbox" id="prsm"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-g" id="apb" style="flex:1">Onayla &mdash; GitHub PR Ac</button>
+        <button class="btn btn-r" id="reb" style="flex:1">Reddet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var tasks=[], sel=new Set(), execId=null, poll=null;
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function sst(m,t){var e=document.getElementById("st");e.className=t;e.textContent=m;e.style.display="block";}
+function upd(){var e=document.getElementById("cnt");if(e)e.textContent=sel.size+"/"+tasks.length+" secili";}
+function req(m,u,d,cb){
+  var x=new XMLHttpRequest();
+  x.open(m,u);x.setRequestHeader("Content-Type","application/json");
+  x.onload=function(){try{cb(null,x.status,JSON.parse(x.responseText));}catch(e){cb(null,x.status,{});}};
+  x.onerror=function(){cb("connection error");};
+  x.send(d?JSON.stringify(d):null);
+}
+function ss(n,s){
+  var e=document.getElementById("s"+n);
+  var icons={sw:"sw",srn:"srn",so:"so",se:"se"};
+  e.className="sico "+s;
+  e.textContent=s==="srn"?"⟳":s==="so"?"✓":s==="se"?"✗":n;
+}
+
+document.getElementById("ab").onclick=function(){
+  var idea=document.getElementById("idea").value.trim();
+  if(!idea){sst("Fikir bos olamaz","err");return;}
+  sst("Claude analiz ediyor...","info");
+  this.disabled=true;var self=this;
+  req("POST","/webhook/dev-intake",{idea:idea},function(err,code,data){
+    self.disabled=false;
+    if(err||code!==200){sst("Hata: "+(err||"HTTP "+code),"err");return;}
+    tasks=data.tasks||[];
+    sel=new Set(tasks.map(function(_,i){return i;}));
+    document.getElementById("sumbox").textContent=data.summary||"";
+    var h="";
+    tasks.forEach(function(t,i){
+      var p=(t.priority||"medium");
+      var pc=p[0]==="h"?"ph":p[0]==="l"?"pl":"pm";
+      h+="<div class='ti sel' id='t"+i+"' onclick='tog("+i+")'>";
+      h+="<div class='tt'><div class='chk'></div><span class='ttl'>"+esc(t.title)+"</span>";
+      h+="<span class='pill "+pc+"'>"+esc(p)+"</span></div>";
+      h+="<div class='tdesc'>"+esc(t.description)+"</div>";
+      if(t.file)h+="<div class='tfile'>"+esc(t.file)+"</div>";
+      h+="</div>";
+    });
+    document.getElementById("tl").innerHTML=h;
+    document.getElementById("ct").style.display="block";
+    document.getElementById("st").style.display="none";
+    upd();
+  });
+};
+
+function tog(i){
+  if(sel.has(i)){sel.delete(i);document.getElementById("t"+i).classList.remove("sel");}
+  else{sel.add(i);document.getElementById("t"+i).classList.add("sel");}
+  upd();
+}
+
+document.getElementById("sa").onclick=function(){
+  tasks.forEach(function(_,i){sel.add(i);var e=document.getElementById("t"+i);if(e)e.classList.add("sel");});upd();
+};
+
+document.getElementById("sb").onclick=function(){
+  var approved=Array.from(sel).sort(function(a,b){return a-b;}).map(function(i){return tasks[i];});
+  if(!approved.length){alert("En az 1 task secmelisin");return;}
+  document.getElementById("ct").style.display="none";
+  document.getElementById("cp").style.display="block";
+  ss(1,"srn");
+  req("POST","/webhook/dev-pipeline",{tasks:approved},function(err,code,data){
+    if(err||code!==200){ss(1,"se");return;}
+    execId=data.executionId;
+    poll=setInterval(function(){
+      if(!execId)return;
+      req("GET","/webhook/dev-status?id="+execId,null,function(err,code,data){
+        if(err||code!==200)return;
+        var s=data.step||0;
+        if(s>=1)ss(1,"so");
+        if(s>=2)ss(2,"srn");
+        if(s>=3){ss(2,"so");ss(3,"so");ss(4,"srn");clearInterval(poll);
+          document.getElementById("prsm").textContent="Tum tasklar tamamlandi! "+(data.filesChanged||0)+" dosya olusturuldu. PR icin onaylayin.";
+          document.getElementById("prs").style.display="block";
+        }
+        if(data.error){clearInterval(poll);ss(data.step||1,"se");}
+      });
+    },3000);
+  });
+};
+
+document.getElementById("apb").onclick=function(){
+  req("POST","/webhook/dev-approve",{executionId:execId},function(err,code,data){
+    if(err||code!==200){alert("PR hatasi");return;}
+    ss(4,"so");
+    document.getElementById("prs").innerHTML="<div class='ok' style='padding:12px;border-radius:6px'>PR acildi: <a href='"+(data.pr_url||"#")+"' target='_blank' style='color:#5fd45f'>"+(data.pr_url||"kontrol et")+"</a></div>";
+  });
+};
+
+document.getElementById("reb").onclick=function(){
+  clearInterval(poll);
+  document.getElementById("cp").style.display="none";
+  document.getElementById("ct").style.display="block";
+};
+</script>
+</body>
+</html>
