@@ -1,0 +1,76 @@
+{
+  "name": "Dev Status Fixed",
+  "nodes": [
+    {
+      "id": "wh2",
+      "name": "Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "dev-status",
+        "responseMode": "lastNode",
+        "httpMethod": "GET"
+      }
+    },
+    {
+      "id": "read2",
+      "name": "Read Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "\nconst fs = require(\"fs\");\nconst q = items[0].json.query || {};\nconst execId = q.id || \"\";\nconst sf = \"/tmp/dev_\" + execId + \".json\";\nlet status = { step: 0, filesChanged: 0, status: \"running\" };\ntry { status = JSON.parse(fs.readFileSync(sf, \"utf8\")); } catch(e) {}\nreturn [{ json: status }];\n"
+      }
+    },
+    {
+      "id": "resp2",
+      "name": "Return Status",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      }
+    }
+  ],
+  "connections": {
+    "Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Status": {
+      "main": [
+        [
+          {
+            "node": "Return Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": true
+}
